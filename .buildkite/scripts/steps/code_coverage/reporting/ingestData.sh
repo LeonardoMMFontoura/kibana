@@ -56,4 +56,11 @@ ingestModular() {
   echo "--- Browse the following url to visually verify in Kibana (Disover):"
   printf "%s \n" "$url"
 
+  cat << EOF | buildkite-agent annotate --style "info" --context 'ctx-info'
+  ### Kibana (Disover)
+
+  $url
+EOF
+
+
 }
