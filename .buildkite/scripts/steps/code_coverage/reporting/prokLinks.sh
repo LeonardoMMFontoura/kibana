@@ -7,12 +7,23 @@ echo "--- process HTML Links"
 xs=("$@")
 len=${#xs[@]}
 
-# TODO-TRE: Maybe use more exhaustive logic instead of just length.
+markdownLinks=()
+## TODO-TRE: Maybe use more exhaustive logic instead of just length.
 if [[ $len -eq 2 ]]; then
   links="<a class="nav-link" href="https://kibana-coverage.elastic.dev/${TIME_STAMP}/jest-combined/index.html">Latest Jest</a><a class="nav-link" href="https://kibana-coverage.elastic.dev/${TIME_STAMP}/functional-combined/index.html">Latest FTR</a>"
+  markdownLinks+=("https://kibana-coverage.elastic.dev/${TIME_STAMP}/jest-combined/index.html")
+  markdownLinks+=("https://kibana-coverage.elastic.dev/${TIME_STAMP}/functional-combined/index.html")
 else
   links="<a class="nav-link" href="https://kibana-coverage.elastic.dev/${TIME_STAMP}/jest-combined/index.html">Latest Jest</a>"
+  markdownLinks+=("https://kibana-coverage.elastic.dev/${TIME_STAMP}/jest-combined/index.html")
 fi
+
+cat <<EOF | buildkite-agent annotate --style "info" --context 'ctx-info'
+### Browse the following url(s) to visually verify in the Code Coverage Static Site
+
+${markdownLinks[*]}
+
+EOF
 
 cat <<EOF >src/dev/code_coverage/www/index_partial_2.html
         ${links}
@@ -36,5 +47,5 @@ cat <<EOF >src/dev/code_coverage/www/index_partial_2.html
 </html>
 EOF
 
-cat src/dev/code_coverage/www/index_partial.html > src/dev/code_coverage/www/index.html
-cat src/dev/code_coverage/www/index_partial_2.html >> src/dev/code_coverage/www/index.html
+cat src/dev/code_coverage/www/index_partial.html >src/dev/code_coverage/www/index.html
+cat src/dev/code_coverage/www/index_partial_2.html >>src/dev/code_coverage/www/index.html
