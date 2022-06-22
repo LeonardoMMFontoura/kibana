@@ -86,6 +86,32 @@ mergeAll() {
   done
 }
 
+annotateForStaticSite() {
+  local xs=("$@")
+  local markdownLinks=()
+
+  OLDIFS="${IFS}"
+  IFS=$'\n'
+
+  for x in "${xs[@]}"; do
+    markdownLinks+=(" - [$x](https://kibana-coverage.elastic.dev/${TIME_STAMP}/${x}-combined/index.html)")
+  done
+
+  content=$(
+    cat <<-EOF
+### Browse the the Code Coverage Static Site
+
+${markdownLinks[*]}
+EOF
+  )
+
+  cat << EOF | buildkite-agent annotate --style "info" --context 'ctx-info'
+${content}
+EOF
+
+  IFS="${OLDIFS}"
+}
+
 modularize() {
   collectRan
   if [ -d target/ran_files ]; then
@@ -95,6 +121,7 @@ modularize() {
     archiveReports "${uniqRanConfigs[@]}"
     .buildkite/scripts/steps/code_coverage/reporting/prokLinks.sh "${uniqRanConfigs[@]}"
     .buildkite/scripts/steps/code_coverage/reporting/uploadStaticSite.sh "${uniqRanConfigs[@]}"
+    annotateForStaticSite "${uniqRanConfigs[@]}"
     .buildkite/scripts/steps/code_coverage/reporting/collectVcsInfo.sh
     source .buildkite/scripts/steps/code_coverage/reporting/ingestData.sh 'elastic+kibana+code-coverage' \
       "${BUILDKITE_BUILD_NUMBER}" "${BUILDKITE_BUILD_URL}" "${PREVIOUS_SHA}" \
