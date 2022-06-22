@@ -105,11 +105,9 @@ ${markdownLinks[*]}
 EOF
   )
 
-  cat << EOF | buildkite-agent annotate --style "info" --context 'ctx-info'
-${content}
-EOF
-
   IFS="${OLDIFS}"
+
+  buildkite-agent annotate --style "info" --context 'ctx-info' "${content}"
 }
 
 modularize() {
